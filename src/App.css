@@ -3,7 +3,7 @@
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
-  --black: #0a0a0a;
+  --black: #0d0d0d;
   --white: #ffffff;
   --cream: #f0f0f0;
   --accent: #e8ff00;
@@ -55,7 +55,8 @@ nav.scrolled {
   height: 100vh;
   display: grid; grid-template-columns: 1fr 1fr;
   margin-bottom: 0;
-}.hero-left {
+}
+.hero-left {
   display: flex; flex-direction: column;
   justify-content: flex-end;
   padding: 0 4rem 6rem;
@@ -128,7 +129,7 @@ nav.scrolled {
   white-space: nowrap; font-weight: 300;
   display: flex; align-items: center; gap: 4rem;
 }
-.marquee-item span { color: var(--accent); }
+.marquee-item span { color: var(--black); }
 
 /* FEATURES */
 .features {
@@ -275,7 +276,7 @@ nav.scrolled {
 .about-hero::before {
   content: '';
   position: absolute; inset: 0;
-  background: radial-gradient(ellipse at 70% 50%, rgba(200,169,126,0.12), transparent 70%);
+  background: radial-gradient(ellipse at 70% 50%, rgba(232,255,0,0.08), transparent 70%);
 }
 .about-hero h1 {
   font-family: 'Cormorant Garamond', serif;
@@ -374,26 +375,11 @@ footer { background: var(--black); color: var(--white); padding: 5rem 4rem 3rem;
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
 }
-function Nav({ page, setPage, bagCount }) {
-  const [scrolled, setScrolled] = useState(false)
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 50)
-    window.addEventListener('scroll', onScroll)
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
 
-  const isAbout = page === 'about'
-  const navColor = (isAbout && !scrolled) ? 'white' : 'var(--black)'
-
-  return (
-    <nav className={scrolled ? 'scrolled' : ''}>
-      <span className="nav-logo" style={{ color: navColor }} onClick={() => setPage('home')}>SHU</span>
-      <ul className="nav-links">
-        <li><a style={{ color: navColor }} onClick={() => setPage('home')}>Home</a></li>
-        <li><a style={{ color: navColor }} onClick={() => setPage('products')}>Products</a></li>
-        <li><a style={{ color: navColor }} onClick={() => setPage('about')}>About</a></li>
-      </ul>
-      <button className="nav-cart" style={{ color: navColor }}>Bag ({bagCount})</button>
-    </nav>
-  )
-}
+/* NAV ABOUT PAGE */
+.nav-about .nav-logo {color: white !important;}
+.nav-about .nav-links a {color: white !important;}
+.nav-about .nav-cart {color: white !important;}
+.nav-about.scrolled .nav-logo {color: #0d0d0d !important;}
+.nav-about.scrolled .nav-links a {color: #0d0d0d !important;}
+.nav-about.scrolled .nav-cart {color: #0d0d0d !important;}
