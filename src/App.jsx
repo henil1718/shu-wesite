@@ -1,5 +1,9 @@
 import { useState, useEffect } from 'react'
 import './App.css'
+import { Canvas, useFrame } from '@react-three/fiber'
+import { OrbitControls, RoundedBox, Sphere } from '@react-three/drei'
+import { useRef } from 'react'
+
 
 const ShoeIcon = ({ sole = '#1a1a1a', upper = '#f0ece4', lace = '#c8a97e', size = 280 }) => (
   <svg viewBox="0 0 400 260" width={size} xmlns="http://www.w3.org/2000/svg">
@@ -74,6 +78,7 @@ function Home({ setPage }) {
       </section>
 
       
+
       <section className="features">
         {[
           { num: '01', title: 'Precision Craft', text: 'Every SHU is assembled by hand, stitch by stitch. We believe footwear is a form of personal architecture — built to carry your story.' },
