@@ -73,16 +73,7 @@ function Home({ setPage }) {
         </div>
       </section>
 
-      <div className="marquee-section">
-        <div className="marquee-track">
-          {[0,1].map(i => (
-            <div className="marquee-item" key={i}>
-              Crafted with Intention <span>✦</span> Free Shipping Worldwide <span>✦</span> Sustainable Materials <span>✦</span> 30-Day Returns <span>✦</span> New Collection 2026 <span>✦</span> Handcrafted Soles <span>✦</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
+      
       <section className="features">
         {[
           { num: '01', title: 'Precision Craft', text: 'Every SHU is assembled by hand, stitch by stitch. We believe footwear is a form of personal architecture — built to carry your story.' },
