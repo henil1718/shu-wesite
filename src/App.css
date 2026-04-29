@@ -34,7 +34,7 @@ nav.scrolled{background:rgba(250,248,243,.96)}
 .featured{display:grid;grid-template-columns:1fr 1fr;gap:1rem;padding:0 1.9rem 1.1rem}
 .featured-visual,.featured-info{border:1px solid var(--line);border-radius:1.7rem}
 .featured-visual{min-height:68vh;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;background:linear-gradient(150deg,#f8f6f1,#eeeadf)}
-.featured-visual::before{content:'SHU';position:absolute;font-family:'Cormorant Garamond',serif;font-size:15rem;color:rgba(31,36,48,.04)}
+.featured-visual::before{content:'NB';position:absolute;font-family:'Cormorant Garamond',serif;font-size:15rem;color:rgba(31,36,48,.04)}
 .featured-info{padding:4rem;background:linear-gradient(155deg,rgba(255,255,255,.96),rgba(244,240,232,.92));display:flex;flex-direction:column;justify-content:center}
 .featured-shoe{z-index:1;animation:floatShoe 5.8s ease-in-out infinite}
 .featured-label,.about-label,.footer-col-title{font-size:.64rem;letter-spacing:.34em;text-transform:uppercase;color:var(--accent);margin-bottom:1rem}
