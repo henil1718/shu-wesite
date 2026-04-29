@@ -1,10 +1,43 @@
 import { useState, useEffect } from 'react'
 import './App.css'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { OrbitControls, RoundedBox, Sphere } from '@react-three/drei'
+import { OrbitControls, ContactShadows, RoundedBox, Sphere, useGLTF } from '@react-three/drei'
 import { useRef } from 'react'
+import { Bounds } from '@react-three/drei'
+import { Environment } from '@react-three/drei'
 
-
+function Shoe3D() {
+  const { scene } = useGLTF('/new_balance_997.glb')
+  const group = useRef()
+  useEffect(() => {
+    scene.traverse((child) => {
+      if (!child.isMesh) return
+      child.castShadow = true
+      child.receiveShadow = true
+      const materials = Array.isArray(child.material) ? child.material : [child.material]
+      materials.forEach((material) => {
+        if (!material) return
+        material.envMapIntensity = 1.15
+        if (typeof material.roughness === 'number') {
+          material.roughness = Math.max(0.18, material.roughness * 0.9)
+        }
+        if (typeof material.metalness === 'number') {
+          material.metalness = Math.min(0.35, material.metalness + 0.04)
+        }
+        material.needsUpdate = true
+      })
+    })
+  }, [scene])
+  useFrame((state) => {
+    group.current.rotation.y += 0.005
+    group.current.position.y = Math.sin(state.clock.elapsedTime * 0.8) * 0.1
+  })
+  return (
+    <group ref={group}>
+      <primitive object={scene} scale={0.90} position={[0, -80, 0]} />
+    </group>
+  )
+}
 const ShoeIcon = ({ sole = '#1a1a1a', upper = '#f0ece4', lace = '#c8a97e', size = 280 }) => (
   <svg viewBox="0 0 400 260" width={size} xmlns="http://www.w3.org/2000/svg">
     <path d="M50 200 Q70 214 220 216 Q340 218 360 200 Q368 190 360 182 Q340 176 220 174 Q70 172 50 182 Z" fill={sole}/>
@@ -25,12 +58,12 @@ const ShoeIcon = ({ sole = '#1a1a1a', upper = '#f0ece4', lace = '#c8a97e', size 
 )
 
 const products = [
-  { id: 1, name: 'Blanc Classic', sub: 'Lifestyle / Unisex', price: '$289', badge: 'New', sole: '#1a1a1a', upper: '#f0ece4', lace: '#c8a97e' },
-  { id: 2, name: 'Noir Luxe', sub: 'Lifestyle / Men\'s', price: '$319', badge: null, sole: '#c8a97e', upper: '#2c2c2c', lace: '#c8a97e' },
-  { id: 3, name: 'Desert Sand', sub: 'Limited Edition / Unisex', price: '$349', badge: 'Limited', sole: '#1a1a1a', upper: '#d4c5b0', lace: '#ffffff' },
-  { id: 4, name: 'Cloud Runner', sub: 'Performance / Unisex', price: '$259', badge: null, sole: '#555', upper: '#e8e8e8', lace: '#888' },
-  { id: 5, name: 'Terra Warm', sub: 'Lifestyle / Women\'s', price: '$299', badge: null, sole: '#8b6f5e', upper: '#c4956a', lace: '#ffffff' },
-  { id: 6, name: 'Midnight Gold', sub: 'Lifestyle / Unisex', price: '$379', badge: 'New', sole: '#1a1a1a', upper: '#1a1a1a', lace: '#c8a97e' },
+  { id: 1, name: '9060', sub: 'Lifestyle / Unisex', price: '$289', badge: 'New', sole: '#1a1a1a', upper: '#f0ece4', lace: '#c8a97e', image: 'nb1.jpg' },
+  { id: 2, name: '204L', sub: 'Lifestyle / Men\'s', price: '$319', badge: null, sole: '#c8a97e', upper: '#2c2c2c', lace: '#c8a97e', image: 'nb2.jpg' },
+  { id: 3, name: 'ABZORD 2010 Grey Days', sub: 'Limited Edition / Unisex', price: '$349', badge: 'Limited', sole: '#1a1a1a', upper: '#d4c5b0', lace: '#ffffff', image: 'nb3.jpg' },
+  { id: 4, name: '1080v15 Grey Days', sub: 'Performance / Unisex', price: '$259', badge: null, sole: '#555', upper: '#e8e8e8', lace: '#888', image: 'nb4.jpg' },
+  { id: 5, name: 'ABZORB 5030 Grey Days', sub: 'Lifestyle / Men\'s', price: '$299', badge: null, sole: '#8b6f5e', upper: '#c4956a', lace: '#ffffff', image: 'nb5.jpg' },
+  { id: 6, name: 'FuelCell Rebel v5', sub: 'Lifestyle / Unisex', price: '$379', badge: 'New', sole: '#1a1a1a', upper: '#1a1a1a', lace: '#c8a97e', image: 'nb6.jpg' },
 ]
 
 function Nav({ page, setPage, bagCount }) {
@@ -41,12 +74,11 @@ function Nav({ page, setPage, bagCount }) {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  const isAbout = page === 'about'
-  const navColor = (isAbout && !scrolled) ? '#ffffff' : '#0d0d0d'
+  const navColor = '#1f2430'
 
   return (
     <nav className={`${scrolled ? 'scrolled' : ''} ${page === 'about' ? 'nav-about' : ''}`}>
-      <span className="nav-logo" style={{ color: navColor }} onClick={() => setPage('home')}>SHU</span>
+      <span className="nav-logo" style={{ color: navColor }} onClick={() => setPage('home')}>NEW BALANCE</span>
       <ul className="nav-links">
         <li><a style={{ color: navColor }} onClick={() => setPage('home')}>Home</a></li>
         <li><a style={{ color: navColor }} onClick={() => setPage('products')}>Products</a></li>
@@ -71,19 +103,42 @@ function Home({ setPage }) {
           </div>
         </div>
         <div className="hero-right">
-          <div className="hero-shoe">
-            <ShoeIcon sole="#1a1a1a" upper="#f0ece4" lace="#c8a97e" size={380} />
-          </div>
-        </div>
+  <div style={{ width: '100%', height: '100%' }}>
+    <Canvas camera={{ position: [0, -0.5, 11], fov: 40 }} shadows dpr={[1, 2]}>
+      <ambientLight intensity={0.1} />
+      <hemisphereLight intensity={0.3} groundColor="#181818" />
+      <directionalLight
+        position={[4, 5, 3]}
+        intensity={0.9}
+        castShadow
+        shadow-mapSize-width={2048}
+        shadow-mapSize-height={2048}
+        shadow-bias={-0.0002}
+      />
+      <Environment preset="city" intensity={0.3} />
+      <Bounds fit clip margin={1.8}>
+        <Shoe3D />
+      </Bounds>
+      <ContactShadows
+        position={[-0.1, -1.15, 0]}
+        opacity={0.42}
+        scale={8}
+        blur={2.3}
+        far={3}
+      />
+      <OrbitControls enableZoom={false} enablePan={false} target={[0, 0, 0]} />
+    </Canvas>
+  </div>
+</div>
       </section>
 
       
 
       <section className="features">
         {[
-          { num: '01', title: 'Precision Craft', text: 'Every SHU is assembled by hand, stitch by stitch. We believe footwear is a form of personal architecture — built to carry your story.' },
+          { num: '01', title: 'Precision Craft', text: 'Every Shoe is assembled by hand, stitch by stitch. We believe footwear is a form of personal architecture — built to carry your story.' },
           { num: '02', title: 'Conscious Materials', text: 'We source only from ethical suppliers. Our leathers, foams, and fabrics are selected for longevity, not trend. Built to last years, not seasons.' },
-          { num: '03', title: 'Timeless Form', text: 'SHU designs don\'t follow trends. We study posture, movement, and ergonomics — then distill it into a silhouette that feels as good as it looks.' },
+          { num: '03', title: 'Timeless Form', text: 'NEW BALANCE designs don\'t follow trends. We study posture, movement, and ergonomics — then distill it into a silhouette that feels as good as it looks.' },
         ].map(f => (
           <div key={f.num}>
             <div className="feature-num">{f.num}</div>
@@ -95,13 +150,11 @@ function Home({ setPage }) {
 
       <section className="featured">
         <div className="featured-visual">
-          <div className="featured-shoe">
-            <ShoeIcon sole="#c8a97e" upper="#ffffff" lace="#1a1a1a" size={420} />
-          </div>
+         <img src="nb7.jpg" alt="Featured Shoe" style={{ width: '80%', height: '80%', objectFit: 'contain' }} />
         </div>
         <div className="featured-info">
           <p className="featured-label">Featured Drop</p>
-          <h2 className="featured-title">The SHU<br />Blanc Classic</h2>
+          <h2 className="featured-title">The NEW BALANCE<br />Cloud Runner</h2>
           <p className="featured-desc">Our most refined silhouette. Bone white leather, gold-toned eyelets, and a hand-stitched midsole. The shoe that started it all — reimagined.</p>
           <div className="featured-price">$289</div>
           <button className="btn-primary" onClick={() => setPage('products')}>Shop Collection</button>
@@ -132,7 +185,7 @@ function Products({ bagCount, setBagCount }) {
           <div className="product-card" key={p.id}>
             <div className="product-card-visual">
               {p.badge && <div className="product-badge">{p.badge}</div>}
-              <ShoeIcon sole={p.sole} upper={p.upper} lace={p.lace} size={240} />
+              <img className="product-card-image" src={p.image} alt={p.name} loading="lazy" />
             </div>
             <p className="product-name">{p.name}</p>
             <p className="product-sub">{p.sub}</p>
@@ -159,7 +212,7 @@ function About() {
         <div className="about-text-block">
           <p className="about-label">Our Philosophy</p>
           <h2 className="about-heading">Born from the idea that less is always more.</h2>
-          <p className="about-para">SHU was founded with one simple conviction: the world didn't need another loud shoe brand. It needed something quieter — more considered.</p>
+          <p className="about-para">NEW BALANCE was founded with one simple conviction: the world didn't need another loud shoe brand. It needed something quieter — more considered.</p>
           <p className="about-para">Every silhouette we create goes through a rigorous stripping process. We add, then subtract, until only what matters remains.</p>
           <p className="about-para">We don't chase trends. We study movement, posture, and the long arc of design history — and we make shoes that belong in that arc.</p>
         </div>
@@ -176,7 +229,7 @@ function About() {
         {[
           { title: 'Sustainability', text: 'We use vegetable-tanned leathers, recycled foams, and water-based adhesives. Our packaging is fully compostable.' },
           { title: 'Craft', text: 'Our shoes are assembled in small-batch workshops by artisans who have spent decades perfecting their trade.' },
-          { title: 'Longevity', text: 'We offer lifetime sole replacement on every pair. A SHU is an investment you\'ll reach for every morning for years.' },
+          { title: 'Longevity', text: 'We offer lifetime sole replacement on every pair. A NEW BALANCE is an investment you\'ll reach for every morning for years.' },
         ].map(v => (
           <div key={v.title}>
             <h3 className="value-title">{v.title}</h3>
@@ -194,7 +247,7 @@ function Footer() {
     <footer>
       <div className="footer-top">
         <div>
-          <div className="footer-brand">SHU</div>
+          <div className="footer-brand">NEW BALANCE</div>
           <p className="footer-tagline">Move in silence.<br />Walk with purpose.<br />Built for the quiet confident.</p>
         </div>
         <div className="footer-col">
@@ -211,7 +264,7 @@ function Footer() {
         </div>
       </div>
       <div className="footer-bottom">
-        <p className="footer-copy">© 2026 SHU. All rights reserved.</p>
+        <p className="footer-copy">© 2026 NEW BALANCE. All rights reserved.</p>
         <div className="footer-socials"><span>Instagram</span><span>Twitter</span><span>Pinterest</span></div>
       </div>
     </footer>
@@ -224,12 +277,18 @@ export default function App() {
 
   useEffect(() => { window.scrollTo(0, 0) }, [page])
 
+  const renderPage = () => {
+    if (page === 'home') return <Home setPage={setPage} />
+    if (page === 'products') return <Products bagCount={bagCount} setBagCount={setBagCount} />
+    return <About />
+  }
+
   return (
     <>
       <Nav page={page} setPage={setPage} bagCount={bagCount} />
-      {page === 'home' && <Home setPage={setPage} />}
-      {page === 'products' && <Products bagCount={bagCount} setBagCount={setBagCount} />}
-      {page === 'about' && <About />}
+      <main key={page} className="page-transition">
+        {renderPage()}
+      </main>
     </>
   )
 }
