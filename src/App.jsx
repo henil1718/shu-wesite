@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react'
 import './App.css'
-import { Canvas, useFrame } from '@react-three/fiber'
-import { OrbitControls, ContactShadows, RoundedBox, Sphere, useGLTF } from '@react-three/drei'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import { OrbitControls, ContactShadows, Bounds, Environment, useGLTF } from '@react-three/drei'
 import { useRef } from 'react'
-import { Bounds } from '@react-three/drei'
-import { Environment } from '@react-three/drei'
 
 function Shoe3D() {
   const { scene } = useGLTF('/new_balance_997.glb')
@@ -38,32 +36,36 @@ function Shoe3D() {
     </group>
   )
 }
-const ShoeIcon = ({ sole = '#1a1a1a', upper = '#f0ece4', lace = '#c8a97e', size = 280 }) => (
-  <svg viewBox="0 0 400 260" width={size} xmlns="http://www.w3.org/2000/svg">
-    <path d="M50 200 Q70 214 220 216 Q340 218 360 200 Q368 190 360 182 Q340 176 220 174 Q70 172 50 182 Z" fill={sole}/>
-    <path d="M80 182 Q78 155 92 130 Q108 105 135 98 Q175 88 215 90 Q255 92 285 108 Q310 122 320 155 Q325 168 322 182 Z" fill={upper}/>
-    <path d="M80 182 Q76 162 90 142 Q104 124 120 118 Q140 112 155 116 Q130 148 128 182 Z" fill={upper} opacity="0.85"/>
-    <path d="M155 116 Q200 106 245 108 Q275 110 295 126 Q302 155 298 182 Q260 176 215 175 Q170 174 128 179 Z" fill={upper} opacity="1.1"/>
-    <line x1="165" y1="133" x2="283" y2="130" stroke={lace} strokeWidth="2" opacity="0.9"/>
-    <line x1="163" y1="147" x2="285" y2="144" stroke={lace} strokeWidth="2" opacity="0.9"/>
-    <line x1="161" y1="161" x2="287" y2="158" stroke={lace} strokeWidth="2" opacity="0.9"/>
-    <line x1="160" y1="174" x2="288" y2="171" stroke={lace} strokeWidth="2" opacity="0.9"/>
-    <circle cx="165" cy="133" r="4" fill={sole}/><circle cx="283" cy="130" r="4" fill={sole}/>
-    <circle cx="163" cy="147" r="4" fill={sole}/><circle cx="285" cy="144" r="4" fill={sole}/>
-    <circle cx="161" cy="161" r="4" fill={sole}/><circle cx="287" cy="158" r="4" fill={sole}/>
-    <circle cx="160" cy="174" r="4" fill={sole}/><circle cx="288" cy="171" r="4" fill={sole}/>
-    <path d="M298 182 Q310 162 305 138 Q295 118 283 110 Q292 136 290 182 Z" fill={upper} opacity="0.8"/>
-    <path d="M290 112 Q298 104 306 112 Q302 124 294 126 Z" fill={lace}/>
-  </svg>
-)
 
+function ImmersiveShoe3D() {
+  const { scene } = useGLTF('/new_balance_997.glb')
+  const group = useRef()
+  const { camera } = useThree()
+
+  useEffect(() => {
+    camera.position.set(0, 0.6, 12)
+  }, [camera])
+
+  useFrame((state) => {
+    const t = Math.min(1, state.clock.elapsedTime / 1.3)
+    camera.position.z = 12 - 8.5 * t
+    camera.position.y = 0.6 - 0.35 * t
+    group.current.rotation.y += 0.006
+    group.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.5) * 0.04
+    group.current.position.y = Math.sin(state.clock.elapsedTime * 1.1) * 0.05
+  })
+
+  return <primitive ref={group} object={scene} scale={0.34} position={[0, -0.45, 0]} />
+}
+
+const parsePrice = (price) => Number(price.replace('$', ''))
 const products = [
-  { id: 1, name: '9060', sub: 'Lifestyle / Unisex', price: '$289', badge: 'New', sole: '#1a1a1a', upper: '#f0ece4', lace: '#c8a97e', image: 'nb1.jpg' },
-  { id: 2, name: '204L', sub: 'Lifestyle / Men\'s', price: '$319', badge: null, sole: '#c8a97e', upper: '#2c2c2c', lace: '#c8a97e', image: 'nb2.jpg' },
-  { id: 3, name: 'ABZORD 2010 Grey Days', sub: 'Limited Edition / Unisex', price: '$349', badge: 'Limited', sole: '#1a1a1a', upper: '#d4c5b0', lace: '#ffffff', image: 'nb3.jpg' },
-  { id: 4, name: '1080v15 Grey Days', sub: 'Performance / Unisex', price: '$259', badge: null, sole: '#555', upper: '#e8e8e8', lace: '#888', image: 'nb4.jpg' },
-  { id: 5, name: 'ABZORB 5030 Grey Days', sub: 'Lifestyle / Men\'s', price: '$299', badge: null, sole: '#8b6f5e', upper: '#c4956a', lace: '#ffffff', image: 'nb5.jpg' },
-  { id: 6, name: 'FuelCell Rebel v5', sub: 'Lifestyle / Unisex', price: '$379', badge: 'New', sole: '#1a1a1a', upper: '#1a1a1a', lace: '#c8a97e', image: 'nb6.jpg' },
+  { id: 1, name: '9060', sub: 'Lifestyle / Unisex', price: '$289', badge: 'New', image: 'nb1.jpg', rating: 4.8, reviews: 412, description: 'Bold retro runner silhouette with plush underfoot comfort and premium layered upper.', highlights: ['ABZORB + SBS cushioning', 'Premium suede mesh upper', 'Wide all-day comfort fit'] },
+  { id: 2, name: '204L', sub: 'Lifestyle / Men\'s', price: '$319', badge: null, image: 'nb2.jpg', rating: 4.7, reviews: 286, description: 'Low-profile everyday pair with minimalist lines, responsive sole and city-ready grip.', highlights: ['Lightweight foam midsole', 'Breathable engineered mesh', 'Slip-resistant rubber outsole'] },
+  { id: 3, name: 'ABZORD 2010 Grey Days', sub: 'Limited Edition / Unisex', price: '$349', badge: 'Limited', image: 'nb3.jpg', rating: 4.9, reviews: 198, description: 'A collector-focused release that blends archival aesthetics with modern comfort geometry.', highlights: ['Limited Grey Days colorway', 'Dual-density cushioning stack', 'Reflective branding details'] },
+  { id: 4, name: '1080v15 Grey Days', sub: 'Performance / Unisex', price: '$259', badge: null, image: 'nb4.jpg', rating: 4.8, reviews: 521, description: 'Performance runner tuned for smooth transitions, soft landings and high-mile durability.', highlights: ['Fresh Foam X platform', 'High-rebound toe-off', 'Engineered heel lockdown'] },
+  { id: 5, name: 'ABZORB 5030 Grey Days', sub: 'Lifestyle / Men\'s', price: '$299', badge: null, image: 'nb5.jpg', rating: 4.6, reviews: 307, description: 'Street-focused comfort pair with elevated materials and subtle vintage-inspired detailing.', highlights: ['ABZORB impact absorption', 'Premium nubuck overlays', 'Flexible forefoot grooves'] },
+  { id: 6, name: 'FuelCell Rebel v5', sub: 'Lifestyle / Unisex', price: '$379', badge: 'New', image: 'nb6.jpg', rating: 4.9, reviews: 174, description: 'High-energy daily trainer with propulsive feel, featherweight build and modern profile.', highlights: ['FuelCell responsive foam', 'Ultra-light race mesh upper', 'Fast-transition rocker shape'] },
 ]
 
 function Nav({ page, setPage, bagCount }) {
@@ -84,7 +86,7 @@ function Nav({ page, setPage, bagCount }) {
         <li><a style={{ color: navColor }} onClick={() => setPage('products')}>Products</a></li>
         <li><a style={{ color: navColor }} onClick={() => setPage('about')}>About</a></li>
       </ul>
-      <button className="nav-cart" style={{ color: navColor }}>Bag ({bagCount})</button>
+      <button className="nav-cart" style={{ color: navColor }} onClick={() => setPage('bag')}>Bag ({bagCount})</button>
     </nav>
   )
 }
@@ -166,9 +168,27 @@ function Home({ setPage }) {
   )
 }
 
-function Products({ bagCount, setBagCount }) {
+function Products({ onAddToBag }) {
   const [active, setActive] = useState('All')
+  const [selectedProduct, setSelectedProduct] = useState(null)
+  const [showImmersiveView, setShowImmersiveView] = useState(false)
   const filters = ['All', "Men's", "Women's", 'Runners', 'Lifestyle', 'Limited']
+
+  const openProductDetail = (product) => setSelectedProduct(product)
+  const closeProductDetail = () => {
+    setSelectedProduct(null)
+    setShowImmersiveView(false)
+  }
+
+  useEffect(() => {
+    if (!selectedProduct) return
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') closeProductDetail()
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [selectedProduct])
+
   return (
     <>
       <div className="products-hero">
@@ -182,7 +202,7 @@ function Products({ bagCount, setBagCount }) {
       </div>
       <div className="products-grid">
         {products.map(p => (
-          <div className="product-card" key={p.id}>
+          <div className="product-card" key={p.id} onClick={() => openProductDetail(p)}>
             <div className="product-card-visual">
               {p.badge && <div className="product-badge">{p.badge}</div>}
               <img className="product-card-image" src={p.image} alt={p.name} loading="lazy" />
@@ -191,11 +211,126 @@ function Products({ bagCount, setBagCount }) {
             <p className="product-sub">{p.sub}</p>
             <div className="product-footer">
               <span className="product-price">{p.price}</span>
-              <button className="product-add" onClick={() => setBagCount(bagCount + 1)}>+</button>
+              <button
+                className="product-add"
+                onClick={(event) => {
+                  event.stopPropagation()
+                  onAddToBag(p)
+                }}
+              >
+                +
+              </button>
             </div>
           </div>
         ))}
       </div>
+      {selectedProduct && (
+        <div className="product-detail-overlay" onClick={closeProductDetail}>
+          <div className="product-detail-scene" onClick={(event) => event.stopPropagation()}>
+            <div className="product-detail-zoom">
+              <img src={selectedProduct.image} alt={selectedProduct.name} className="product-detail-image" />
+            </div>
+            <aside className="product-detail-panel">
+              <button className="product-detail-close" onClick={closeProductDetail}>Close</button>
+              <p className="product-detail-eyebrow">Immersive Product View</p>
+              <h3>{selectedProduct.name}</h3>
+              <p className="product-detail-sub">{selectedProduct.sub}</p>
+              <p className="product-detail-price">{selectedProduct.price}</p>
+              <p className="product-detail-rating">Rating {selectedProduct.rating} / 5 · {selectedProduct.reviews} reviews</p>
+              <p className="product-detail-description">{selectedProduct.description}</p>
+              <ul className="product-detail-highlights">
+                {selectedProduct.highlights.map((item) => <li key={item}>{item}</li>)}
+              </ul>
+              <div className="product-detail-actions">
+                <button className="btn-ghost" onClick={() => setShowImmersiveView(true)}>Enter 3D View</button>
+                <button className="btn-primary" onClick={() => onAddToBag(selectedProduct)}>Add To Bag</button>
+              </div>
+            </aside>
+          </div>
+        </div>
+      )}
+      {showImmersiveView && selectedProduct && (
+        <div className="immersive-overlay" onClick={() => setShowImmersiveView(false)}>
+          <div className="immersive-shell" onClick={(event) => event.stopPropagation()}>
+            <div className="immersive-header">
+              <p>Inside {selectedProduct.name}</p>
+              <button className="product-detail-close" onClick={() => setShowImmersiveView(false)}>Close View</button>
+            </div>
+            <Canvas camera={{ position: [0, 0.6, 12], fov: 48 }} shadows dpr={[1, 2]}>
+              <ambientLight intensity={0.4} />
+              <directionalLight position={[4, 6, 4]} intensity={1.2} />
+              <Environment preset="warehouse" intensity={0.6} />
+              <ImmersiveShoe3D />
+              <ContactShadows position={[0, -1.15, 0]} opacity={0.36} scale={10} blur={2.2} far={4} />
+              <OrbitControls enablePan={false} maxDistance={6} minDistance={2.2} />
+            </Canvas>
+          </div>
+        </div>
+      )}
+      <Footer />
+    </>
+  )
+}
+
+function Bag({ cartItems, updateQty, removeFromBag }) {
+  const subtotal = cartItems.reduce((sum, item) => sum + parsePrice(item.price) * item.qty, 0)
+  const shipping = subtotal > 0 ? 18 : 0
+  const tax = subtotal * 0.08
+  const total = subtotal + shipping + tax
+
+  return (
+    <>
+      <section className="bag-page">
+        <div className="bag-header">
+          <h1>Your Cart</h1>
+          <p>{cartItems.length} item types selected</p>
+        </div>
+        <div className="bag-layout">
+          <div className="bag-items">
+            {cartItems.length === 0 && <p className="bag-empty">Your bag is empty. Add a pair from the products page.</p>}
+            {cartItems.map((item) => (
+              <article key={item.id} className="bag-item-card">
+                <img src={item.image} alt={item.name} />
+                <div>
+                  <h3>{item.name}</h3>
+                  <p>{item.sub}</p>
+                  <strong>{item.price}</strong>
+                </div>
+                <div className="bag-item-actions">
+                  <div className="qty-controls">
+                    <button onClick={() => updateQty(item.id, -1)}>-</button>
+                    <span>{item.qty}</span>
+                    <button onClick={() => updateQty(item.id, 1)}>+</button>
+                  </div>
+                  <button className="remove-btn" onClick={() => removeFromBag(item.id)}>Remove</button>
+                </div>
+              </article>
+            ))}
+          </div>
+          <aside className="checkout-panel">
+            <h2>Checkout</h2>
+            <label>Full Name<input type="text" placeholder="John Doe" /></label>
+            <label>Address<input type="text" placeholder="221B Baker Street" /></label>
+            <label>City<input type="text" placeholder="London" /></label>
+            <label>Postal Code<input type="text" placeholder="NW1 6XE" /></label>
+            <label>Payment Method
+              <select defaultValue="card">
+                <option value="card">Credit / Debit Card</option>
+                <option value="upi">UPI</option>
+                <option value="paypal">PayPal</option>
+                <option value="cod">Cash on Delivery</option>
+              </select>
+            </label>
+            <div className="totals">
+              <p><span>Subtotal</span><span>${subtotal.toFixed(2)}</span></p>
+              <p><span>Shipping</span><span>${shipping.toFixed(2)}</span></p>
+              <p><span>Tax</span><span>${tax.toFixed(2)}</span></p>
+              <p className="total-row"><span>Total</span><span>${total.toFixed(2)}</span></p>
+            </div>
+            <button className="btn-primary">Proceed To Payment</button>
+          </aside>
+        </div>
+      </section>
       <Footer />
     </>
   )
@@ -273,13 +408,36 @@ function Footer() {
 
 export default function App() {
   const [page, setPage] = useState('home')
-  const [bagCount, setBagCount] = useState(0)
+  const [bagItems, setBagItems] = useState([])
+
+  const addToBag = (product) => {
+    setBagItems((prev) => {
+      const existing = prev.find((item) => item.id === product.id)
+      if (existing) {
+        return prev.map((item) => item.id === product.id ? { ...item, qty: item.qty + 1 } : item)
+      }
+      return [...prev, { ...product, qty: 1 }]
+    })
+  }
+
+  const updateQty = (productId, delta) => {
+    setBagItems((prev) => prev
+      .map((item) => item.id === productId ? { ...item, qty: Math.max(1, item.qty + delta) } : item)
+      .filter((item) => item.qty > 0))
+  }
+
+  const removeFromBag = (productId) => {
+    setBagItems((prev) => prev.filter((item) => item.id !== productId))
+  }
+
+  const bagCount = bagItems.reduce((sum, item) => sum + item.qty, 0)
 
   useEffect(() => { window.scrollTo(0, 0) }, [page])
 
   const renderPage = () => {
     if (page === 'home') return <Home setPage={setPage} />
-    if (page === 'products') return <Products bagCount={bagCount} setBagCount={setBagCount} />
+    if (page === 'products') return <Products onAddToBag={addToBag} />
+    if (page === 'bag') return <Bag cartItems={bagItems} updateQty={updateQty} removeFromBag={removeFromBag} />
     return <About />
   }
 
